@@ -1,0 +1,27 @@
+.remove {
+    border-color: red !important;
+    background-color: red !important;
+    color: white !important;
+}
+
+.remove:hover {
+    background-color: #f5365c !important;
+}
+
+.remove:active {
+    background-color: #f5365c !important;
+}
+
+.edit {
+    border-color: orange !important;
+    background-color: orange !important;
+    color: white !important;
+}
+
+.edit:hover {
+    background-color: rgba(255, 183, 81, 0.84) !important;
+}
+
+.remove:active {
+    background-color: rgba(255, 183, 81, 0.84) !important;
+}
