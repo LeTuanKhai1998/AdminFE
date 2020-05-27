@@ -92,8 +92,9 @@ class UsersDataService {
         return axios.post(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.TopViewByTime}`, form);
     }
 
-
     updateUser(form) {
+        // eslint-disable-next-line no-console
+        console.log("form",form)
         return axios.post(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.UpdateUser}`, form);
     }
 

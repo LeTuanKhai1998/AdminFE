@@ -1,5 +1,5 @@
 <template>
-  <div class="header" :class="{[`bg-${type}`]: type}">
+  <div class="header" :class="{[`bg-${type}`]: type}" v-lazy:background-image="banner.url">
     <div class="container-fluid">
       <div class="header-body">
         <slot></slot>
@@ -11,6 +11,7 @@
   export default {
     name: 'base-header',
     props: {
+      banner:Object,
       type: {
         type: String,
         default: 'primary',

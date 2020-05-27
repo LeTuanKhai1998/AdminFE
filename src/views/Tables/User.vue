@@ -52,8 +52,12 @@
                     </td>
 
                     <td>
-                        <base-button class="edit"  type="primary" @click.prevent="openDetail(row)"   icon="fas fa-pencil-alt" size="sm">Sửa</base-button>
-                        <base-button class="remove"  type="primary" @click.prevent="openDelete(row)"   icon="fas fa-trash" size="sm">Xóa</base-button>
+                        <base-button class="edit" type="primary" @click.prevent="openDetail(row)"
+                                     icon="fas fa-pencil-alt" size="sm">Sửa
+                        </base-button>
+                        <base-button class="remove" type="primary" @click.prevent="openDelete(row)" icon="fas fa-trash"
+                                     size="sm">Xóa
+                        </base-button>
                     </td>
 
 
@@ -140,13 +144,20 @@
                 <div style="margin-top: 20px">
                     <label class="form-control-label">Ảnh đại diện</label>
                     <div class="row justify-content-center">
-                        <img v-if="selectedItem.avatar" :src="getImgUrl(selectedItem.avatar.url)"
+                        <img v-if="selectedItem.avatar" v-lazy="selectedItem.avatar.url"
                              :alt="selectedItem.avatar.alt"
                              class="rounded-circle avatarEdit">
-                        <base-button size="sm" type="info" class="mr-4 btnEditAvtar">Chọn ảnh</base-button>
+                        <!--                        <base-button size="sm" type="info" class="mr-4 btnEditAvtar">Chọn ảnh</base-button>-->
                     </div>
                 </div>
             </div>
+            <div class="upload-btn-wrapper center">
+                <button class="btn btn-info" style="font-size: small;">Chọn hình</button>
+                <input accept="image/*" type="file" name="myfile" style="cursor: pointer"
+                       @change="onFileSelected"
+                       id="file-input"/>
+            </div>
+
             <!--            </div>-->
             <template slot="footer">
                 <base-button type="secondary" @click.prevent="isModal = false">Bỏ qua</base-button>
@@ -159,12 +170,30 @@
             </template>
             <div v-if="selectedItem">
                 <h4 class="modal-title">Bạn chắc chắn muốn xóa người dùng "{{this.selectedItem.username}}" không?</h4>
-                <h5 class="modal-title" style="color: red;margin-top: 5px">(Lưu ý xóa người dũng sẽ xóa luôn dữ liệu người đó)</h5>
+                <h5 class="modal-title" style="color: red;margin-top: 5px">(Lưu ý xóa người dũng sẽ xóa luôn dữ liệu
+                    người đó)</h5>
             </div>
             <!--            </div>-->
             <template slot="footer">
                 <base-button type="secondary" @click.prevent="isDeleteModal = false">Bỏ qua</base-button>
                 <base-button type="primary" @click.prevent="deleteUser">Xác nhận xóa</base-button>
+            </template>
+        </modal>
+
+        <modal :show.sync="isUploadImage">
+            <template slot="header">
+                <h3 class="modal-title">Lưu thông tin</h3>
+            </template>
+            <div>
+                <base-progress type="success" :height="8" :value="uploadValue"
+                               label="Đang tải ảnh lên..."></base-progress>
+                <h5 v-if="uploadValue==100" class="modal-title" style="color: green;margin-top: 5px">Đã tải ảnh thành
+                    công!</h5>
+            </div>
+            <!--            </div>-->
+            <template slot="footer">
+                <base-button type="secondary" @click.prevent="updateUserDetail">OK</base-button>
+                <!--                <base-button type="primary" @click.prevent="deleteActor">Xác nhận xóa</base-button>-->
             </template>
         </modal>
     </div>
@@ -177,6 +206,8 @@
     import Multiselect from 'vue-multiselect'
     import getUrl from "../../common/getUrl";
     import StringConstant from "../../constant/StringConstant";
+    import firebase from "firebase";
+
     export default {
         components: {
             Multiselect
@@ -190,6 +221,9 @@
         },
         data() {
             return {
+                uploadValue: 0,
+                isUploadImage: false,
+                selectedImage: null,
                 password: '',
                 message: '',
                 selectedItem: null,
@@ -212,6 +246,18 @@
                 },
             }
         },
+        watch: {
+            isUploadImage(val) {
+                if (val == 100) {
+                    this.uploadValue = 0;
+                }
+            },
+            isModal(val) {
+                if (val == false) {
+                    this.prepation();
+                }
+            }
+        },
         filters: {
             concatStr: function (lastname, firstname) {
                 return lastname.concat(' ', firstname)
@@ -231,6 +277,10 @@
                 this.formToast.message = message
                 this.formToast.type = type
             },
+            onFileSelected(event) {
+                this.selectedImage = event.target.files[0];
+                this.selectedItem.avatar.url = URL.createObjectURL(this.selectedImage);
+            },
             deleteUser() {
                 MovieService.deleteUserById(this.selectedItem.id)
                     .then(response => {
@@ -246,9 +296,9 @@
                 this.selectedItem = null;
                 this.isDeleteModal = false;
             },
-            updateUser() {
-                this.selectedItem.avatar.alt = this.selectedItem.username;
-                this.selectedItem.password = this.password;
+            updateUserDetail() {
+                // eslint-disable-next-line no-console
+                console.log("selectedItem", this.selectedItem)
                 MovieService.updateUser(this.selectedItem)
                     .then(response => {
                         this.message = response.data.data.data;
@@ -257,15 +307,55 @@
                         } else {
                             this.setDataToast("Thao tác không thành công, xin thủ lại sau!", StringConstant.TypeToastError)
                         }
+                        this.isUploadImage = false;
+                        this.selectedItem = null;
                         this.prepation();
                         this.showToast()
                     });
-                this.isModal = false;
+
+            },
+            updateUser() {
+                this.selectedItem.avatar.alt = this.selectedItem.username;
+                this.selectedItem.password = this.password;
+
+                if (this.selectedImage) {
+                    this.isModal = false;
+                    this.isUploadImage = true;
+                    this.uploadImage(this.selectedItem.username, this.selectedImage)
+                } else {
+                    this.updateUserDetail();
+                    this.isModal = false;
+                }
+            },
+            uploadImage(name, selectedImage) {
+                // let data = new FormData();
+                // data.append('file', this.selectedImage, 'my-picture');
+                const storageRef = firebase.storage().ref(`/users/${name}.jpg`).put(selectedImage);
+                storageRef.on(`state_changed`, snapshot => {
+                        this.uploadValue = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+
+                    }, error => {
+                        // eslint-disable-next-line no-console
+                        console.log(error.message)
+                    },
+                    () => {
+                        this.uploadValue = 100;
+                        storageRef.snapshot.ref.getDownloadURL().then((url) => {
+                            this.selectedItem.avatar.url = url;
+                            this.selectedItem.avatar.alt = name;
+                            // eslint-disable-next-line no-console
+                            console.log(this.selectedItem.avatar)
+                            // eslint-disable-next-line no-console
+                            console.log("url", url)
+                            this.updateUserDetail();
+                        });
+                    }
+                )
             },
             getImgUrl(val) {
                 return getUrl.getImgUrl(val, 0)
             },
-            openDelete(row){
+            openDelete(row) {
                 this.selectedItem = row;
                 this.isModal = false;
                 this.isDeleteModal = true;
@@ -281,8 +371,8 @@
                     "country": null,
                     "avatar": {
                         "id": 0,
-                        "url": "empty.jpg",
-                        "alt": "empty"
+                        "url": "https://firebasestorage.googleapis.com/v0/b/movie-online-7f8ea.appspot.com/o/users%2Fempty.jpg?alt=media&token=4ce86095-0f1e-4455-aa0c-b62ddfa7bac2",
+                        "alt": ""
                     },
                     "role": null
                 };
@@ -325,6 +415,21 @@
     }
 </script>
 <style>
+
+    .upload-btn-wrapper {
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+    }
+
+    .upload-btn-wrapper input[type=file] {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+    }
+
     .row {
         margin-bottom: 20px;
         position: relative;
@@ -332,8 +437,10 @@
     }
 
     .avatarEdit {
-        width: 50%;
-        height: auto;
+        width: 256px;
+        height: 256px;
+        object-fit: cover;
+        border-radius: 50%;
     }
 
     .row .btnEditAvtar {
