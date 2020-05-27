@@ -1,7 +1,9 @@
 <template>
     <div v-if="model">
+        <!--        <base-header class="header pb-8 pt-5 pt-lg-8 d-flex align-items-center background"-->
+        <!--                     :style="{'backgroundImage': 'url('+getImgUrl(model.banner.url)+')'}">-->
         <base-header class="header pb-8 pt-5 pt-lg-8 d-flex align-items-center background"
-                     :style="{'backgroundImage': 'url('+getImgUrl(model.banner.url)+')'}">
+                     :style="{'backgroundImage': 'url('+model.banner.url+')'}">
             <!-- Mask -->
             <span class="mask bg-gradient-success opacity-8"></span>
             <!-- Header container -->
@@ -17,7 +19,7 @@
                         <div class="upload-btn-wrapper">
                             <button class="btn btn-info" style="font-size: medium;min-width: 120px;">Đổi hình</button>
                             <input accept="image/*" type="file" name="myfile" style="cursor: pointer"
-                                   @change="uploadImage($event)"
+                                   @change="onFileSelectedBanner"
                                    id="file-input"/>
                         </div>
                         <!--                        <input class="btn" type="file" accept="image/*" @change="uploadImage($event)" id="file-input">-->
@@ -36,7 +38,9 @@
                             <div class="col-lg-3 order-lg-2">
                                 <div class="card-profile-image">
                                     <a href="#">
-                                        <img :src="getImgUrl(model.image.url)" :alt="model.image.alt"
+                                        <!--                                        <img :src="getImgUrl(model.image.url)" :alt="model.image.alt"-->
+                                        <!--                                             class="rounded-circle">-->
+                                        <img :src="model.image.url" :alt="model.image.alt"
                                              class="rounded-circle">
                                     </a>
                                 </div>
@@ -44,7 +48,13 @@
                         </div>
                         <div class="card-header text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
                             <div class="d-flex justify-content-between">
-                                <base-button size="sm" type="info" class="mr-4">Đổi hình</base-button>
+                                <div class="upload-btn-wrapper">
+                                    <base-button size="sm" type="info" class="mr-4">Đổi hình</base-button>
+                                    <input accept="image/*" type="file" name="myfile" style="cursor: pointer"
+                                           @change="onFileSelectedImage"
+                                           id="file-input-image"/>
+                                </div>
+                                <!--                                <base-button size="sm" type="info" class="mr-4">Đổi hình</base-button>-->
                                 <!--                                <base-button size="sm" type="default" class="float-right">Xóa hình</base-button>-->
                             </div>
                         </div>
@@ -68,24 +78,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!--                            <div class="text-center">-->
-                            <!--                                <h3>-->
-                            <!--                                    Jessica Jones<span class="font-weight-light">, 27</span>-->
-                            <!--                                </h3>-->
-                            <!--                                <div class="h5 font-weight-300">-->
-                            <!--                                    <i class="ni location_pin mr-2"></i>Bucharest, Romania-->
-                            <!--                                </div>-->
-                            <!--                                <div class="h5 mt-4">-->
-                            <!--                                    <i class="ni business_briefcase-24 mr-2"></i>Solution Manager - Creative Tim Officer-->
-                            <!--                                </div>-->
-                            <!--                                <div>-->
-                            <!--                                    <i class="ni education_hat mr-2"></i>University of Computer Science-->
-                            <!--                                </div>-->
-                            <!--                                <hr class="my-4"/>-->
-                            <!--                                <p>Ryan — the name taken by Melbourne-raised, Brooklyn-based Nick Murphy — writes,-->
-                            <!--                                    performs and records all of his own music.</p>-->
-                            <!--                                <a href="#">Show more</a>-->
-                            <!--                            </div>-->
                         </div>
                     </div>
                 </div>
@@ -209,6 +201,27 @@
                 </div>
             </div>
         </div>
+        <modal :show.sync="isUploadImage">
+            <template slot="header">
+                <h3 class="modal-title">Lưu thông tin</h3>
+            </template>
+            <div>
+                <base-progress type="success" :height="8" :value="uploadValue"
+                               label="Đang tải ảnh lên..."></base-progress>
+                <h5 v-if="uploadValue==100" class="modal-title" style="color: green;margin-top: 5px">Đã tải ảnh thành
+                    công!</h5>
+                <base-progress type="success" :height="8" :value="uploadValueBanner"
+                               label="Đang tải ảnh banner lên..."></base-progress>
+                <h5 v-if="uploadValue==100" class="modal-title" style="color: green;margin-top: 5px">Đã tải ảnh banner
+                    thành
+                    công!</h5>
+            </div>
+            <!--            </div>-->
+            <template slot="footer">
+                <base-button type="secondary" @click.prevent="updateMovieDetail">OK</base-button>
+                <!--                <base-button type="primary" @click.prevent="deleteActor">Xác nhận xóa</base-button>-->
+            </template>
+        </modal>
     </div>
 </template>
 <script>
@@ -230,6 +243,9 @@
         },
         data() {
             return {
+                uploadValue: 0,
+                uploadValueBanner: 0,
+                isUploadImage: false,
                 member: {
                     name: "Jakz",
                     coverImage: "<https://vuejs.org/images/logo.png>"
@@ -243,6 +259,8 @@
                 model: null,
                 message: '',
                 form: null,
+                selectedImage: null,
+                selectedBanner: null,
                 formToast: {
                     message: '',
                     type: '',
@@ -255,6 +273,14 @@
             this.prepation();
         },
         methods: {
+            onFileSelectedBanner(event) {
+                this.selectedBanner = event.target.files[0];
+                this.model.banner.url = URL.createObjectURL(this.selectedBanner);
+            },
+            onFileSelectedImage(event) {
+                this.selectedImage = event.target.files[0];
+                this.model.image.url = URL.createObjectURL(this.selectedImage);
+            },
             showToast() {
                 this.$toast.open(this.formToast)
             },
@@ -272,8 +298,12 @@
                     updateImage: true
                 }
             },
-            updateMovie() {
-                this.model.slug = stringUtil.convertToSlug(this.model.name)
+            updateMovieDetail() {
+                // eslint-disable-next-line no-console
+                console.log("image", this.model.image)
+                // eslint-disable-next-line no-console
+                console.log("banner", this.model.banner)
+                alert()
                 this.setDataForm();
                 MovieService.updateMovie(this.form)
                     .then(respose => {
@@ -281,27 +311,60 @@
                         if (this.message.localeCompare("successful") == 0) {
                             this.setDataToast("Lưu thông tin thành công!", StringConstant.TypeToastSuccess)
                         } else {
-                            this.setDataToast("Thao tác không thành công, xin thủ lại sau!", StringConstant.TypeToastError)
+                            this.setDataToast("Thao tác không thành công, xin thử lại sau!", StringConstant.TypeToastError)
                         }
+                        this.isUploadImage = false
                         this.showToast()
                         if (this.$routerHistory.hasPrevious()) {
                             this.$router.push({path: this.$routerHistory.previous().path})
                         }
                     });
             },
-            async uploadImage(event) {
+            updateMovie() {
+                this.model.slug = stringUtil.convertToSlug(this.model.name)
+
+                if (this.selectedImage) {
+                    this.isUploadImage = true;
+                    this.uploadImage(this.model.slug, this.selectedImage, 1);
+                }
+                if (this.selectedImage) {
+                    this.isUploadImage = true;
+                    this.uploadImage(this.model.slug + "_banner", this.selectedBanner, 2);
+                }
+            },
+            uploadImage(name, selectedImage, type) {
                 // let data = new FormData();
-                // data.append('file', event.target.files[0], 'my-picture');
-                const storageRef = firebase.storage().ref(`${event.target.files[0].name}`).put(event.target.files[0]);
+                // data.append('file', this.selectedImage, 'my-picture');
+                const storageRef = firebase.storage().ref(`/movies/${name}.jpg`).put(selectedImage);
                 storageRef.on(`state_changed`, snapshot => {
-                        this.uploadValue = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        if (type == 1) {
+                            this.uploadValue = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        } else {
+                            this.uploadValueBanner = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        }
+
                     }, error => {
                         // eslint-disable-next-line no-console
                         console.log(error.message)
                     },
                     () => {
-                        this.uploadValue = 100;
+                        if (type == 1) {
+                            this.uploadValue = 100;
+                        } else {
+                            this.uploadValueBanner = 100;
+                        }
                         storageRef.snapshot.ref.getDownloadURL().then((url) => {
+                            if (type == 1) {
+                                this.model.image.url = url;
+                                this.model.image.alt = name;
+                            } else {
+                                this.model.banner.url = url;
+                                this.model.banner.alt = name + " banner";
+                            }
+                            // eslint-disable-next-line no-console
+                            console.log("image", this.model.image)
+                            // eslint-disable-next-line no-console
+                            console.log("banner", this.model.banner)
                             // this.picture =url;
                             // eslint-disable-next-line no-console
                             console.log("url", url)
@@ -354,12 +417,12 @@
                     "country": null,
                     "image": {
                         "id": 0,
-                        "url": "empty.jpg",
+                        "url": "https://firebasestorage.googleapis.com/v0/b/movie-online-7f8ea.appspot.com/o/movies%2Fempty_banner.jpg?alt=media&token=d29e1c49-f22b-4e84-8cc7-e8f68bbc2ba2",
                         "alt": " "
                     },
                     "banner": {
                         "id": 0,
-                        "url": "empty_banner.jpg",
+                        "url": "https://firebasestorage.googleapis.com/v0/b/movie-online-7f8ea.appspot.com/o/movies%2Fempty.jpg?alt=media&token=dbdc5be2-4c74-4dc8-8f56-6c9217a678b4",
                         "alt": ""
                     },
                     "genres": [],
