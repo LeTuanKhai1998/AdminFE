@@ -47,49 +47,73 @@ const router = new Router({
                 {
                     path: '/tables',
                     name: 'tables',
+                    meta: {
+                        requiresAuth: true
+                    },
                     component: () => import(/* webpackChunkName: "demo" */ './views/Tables.vue')
                 },
                 {
                     path: '/movies',
+                    name: 'movies',
                     meta: {
                         requiresAuth: true
                     },
-                    name: 'movies',
                     component: () => import(/* webpackChunkName: "demo" */ './views/ListMovie')
                 },
                 {
                     path: '/actors',
                     name: 'actors',
+                    meta: {
+                        requiresAuth: true
+                    },
                     component: () => import(/* webpackChunkName: "demo" */ './views/ListActor')
                 },
                 {
                     path: '/genres',
                     name: 'genres',
+                    meta: {
+                        requiresAuth: true
+                    },
                     component: () => import(/* webpackChunkName: "demo" */ './views/ListGenre')
                 },
                 {
                     path: '/users',
                     name: 'users',
+                    meta: {
+                        requiresAuth: true
+                    },
                     component: () => import(/* webpackChunkName: "demo" */ './views/ListUser')
                 },
                 {
                     path: '/countrys',
                     name: 'countrys',
+                    meta: {
+                        requiresAuth: true
+                    },
                     component: () => import(/* webpackChunkName: "demo" */ './views/ListCountry')
                 },
                 {
                     path: '/directors',
                     name: 'directors',
+                    meta: {
+                        requiresAuth: true
+                    },
                     component: () => import(/* webpackChunkName: "demo" */ './views/ListDirector')
                 },
                 {
                     path: '/userroles',
                     name: 'user-roles',
+                    meta: {
+                        requiresAuth: true
+                    },
                     component: () => import(/* webpackChunkName: "demo" */ './views/ListUserRole')
                 },
                 {
                     path: '/moviedetail/:slug',
                     name: 'movies-detail',
+                    meta: {
+                        requiresAuth: true
+                    },
                     component: () => import(/* webpackChunkName: "demo" */ './views/MovieDetail'),
                     props: true,
 
@@ -119,7 +143,6 @@ router.beforeEach((to, from, next) => {
     if (to.matched.some(record => record.meta.requiresAuth)) {
         // this route requires auth, check if logged in
         // if not, redirect to login page.
-
         if (to.name !== 'login' && !store.getters.isLoggedIn) {
             next({name: 'login'})
         } else {

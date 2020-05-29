@@ -29,7 +29,10 @@ const MOVIE = {
     DeleteMovieById:'DeleteMovieById?id=',
     UpdateUserRole:'UpdateUserRole',
     DeleteUserRoleById:'DeleteUserRoleById?id=',
-    Secured:'Secured'
+    Secured:'Secured',
+    GetUserByUserName:'GetUserByUserName?userName=',
+    UpdateUserPassword:'UpdateUserPassword',
+    login:'login'
 
 };
 

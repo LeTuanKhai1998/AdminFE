@@ -57,6 +57,7 @@
 </template>
 <script>
     import StringConstant from "../constant/StringConstant";
+    import MovieService from "../services/MovieService";
 
     export default {
         name: 'login',
@@ -76,9 +77,7 @@
                 },
             }
         },
-        watch:{
-
-        },
+        watch: {},
         created() {
 
         },
@@ -90,16 +89,35 @@
                 this.formToast.message = message
                 this.formToast.type = type
             },
-            callLogin() {
-                // eslint-disable-next-line no-console
-                console.log(this.model);
-                this.$store.dispatch('login', {user: this.model})
-                    .then(() => this.$router.push('/'))
+            async checkUserRole() {
+                MovieService.getUserByUserName(this.model.username).then(
+                    response => {
+                        if (response.data.data.data.role.permissionTabs.length > 0) {
+                            // place the loginSuccess state into our vuex store
+                            this.loginSuccess = true;
+                            this.setDataToast("Đăng nhập thành công!", StringConstant.TypeToastSuccess)
+                            this.showToast();
+                            this.$router.push('/')
+                        } else {
+                            this.loginSuccess = false;
+                            this.setDataToast("Tài khoản của bạn không có quyền admin!", StringConstant.TypeToastError)
+                            this.showToast();
+                        }
+                    }
+                )
+            },
+            async callLogin() {
+                await this.$store.dispatch('login', {user: this.model})
+                    .then(() => {
+                    })
                     .catch(error => {
                         this.setDataToast("Đăng nhập không thành công, vui lòng kiểm tra lại thông tin!", StringConstant.TypeToastError)
                         this.showToast();
                         this.error.push(error)
                     })
+
+                await this.checkUserRole();
+
             }
         }
     }

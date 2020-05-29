@@ -160,6 +160,23 @@ class UsersDataService {
             }
         });
     }
+
+    login(user, password) {
+        return axios.get(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.login}`, {
+            auth: {
+                username: user,
+                password: password
+            }
+        });
+    }
+
+    getUserByUserName(username) {
+        return axios.get(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.GetUserByUserName}` + username);
+    }
+
+    updateUserPassword(form) {
+        return axios.post(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.UpdateUserPassword}`, form);
+    }
 }
 
 export default new UsersDataService();

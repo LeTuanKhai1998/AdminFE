@@ -29,4 +29,8 @@
     }
 </script>
 <style>
+    .header{
+        background-size: cover !important;
+        background-position: center top!important;
+    }
 </style>

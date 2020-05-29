@@ -14,6 +14,7 @@ const store = new Vuex.Store({
     },
     mutations: {
         login_success(state, payload) {
+
             state.loginSuccess = true;
             state.userName = payload.userName;
             state.userPass = payload.userPass;
@@ -28,26 +29,32 @@ const store = new Vuex.Store({
         async login({commit}, userObj) {
             let user = userObj.user;
             // eslint-disable-next-line no-console
-            console.log("user",user)
-            MovieService.getSecured(user.username, user.password)
+            console.log("user", user)
+            return MovieService.login(user.username, user.password)
                 .then(response => {
                     // eslint-disable-next-line no-console
                     console.log("Response: '" + response.data + "' with Statuscode " + response.status);
                     if (response.status == 200) {
-                        // alert("login_success")
-                        // place the loginSuccess state into our vuex store
-                        return commit('login_success', {
-                            userName: user.username,
-                            userPass: user.password
-                        });
+                        MovieService.getUserByUserName(user.username).then(
+                            response => {
+                                if (response.data.data.data.role.permissionTabs.length > 0) {
+
+                                    // place the loginSuccess state into our vuex store
+                                    return commit('login_success', {
+                                        userName: user.username,
+                                        userPass: user.password
+                                    });
+                                }
+                            }
+                        )
                     }
                 }).catch(error => {
-                // eslint-disable-next-line no-console
-                console.log("Error: " + error);
-                // place the loginError state into our vuex store
-                commit('login_error', name);
-                return Promise.reject("Invald credentials!")
-            })
+                    // eslint-disable-next-line no-console
+                    console.log("Error: " + error);
+                    // place the loginError state into our vuex store
+                    commit('login_error', name);
+                    return Promise.reject("Invald credentials!")
+                })
         }
     },
     getters: {
