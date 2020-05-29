@@ -164,7 +164,7 @@
                                                     :searchable="true"
                                                     :close-on-select="true"
                                                     :allow-empty="false"
-                                                    placeholder="Chọn quốc gia"
+                                                    placeholder="Chọn quyền hạn"
                                                     label="name"
                                                     track-by="name"/>
                                         </div>
@@ -396,7 +396,7 @@
                             this.countrys = respose.data.data.data;
                         });
                 }
-                if (this.countrys.roles == 0) {
+                if (this.roles.length == 0) {
                     MovieService.getUserRoles()
                         .then(respose => {
                             this.roles = respose.data.data.data;
