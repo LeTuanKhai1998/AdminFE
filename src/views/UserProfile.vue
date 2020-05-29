@@ -159,6 +159,7 @@
                                         <div class="col-lg-6">
                                             <label class="form-control-label">Quyền hạn</label>
                                             <multiselect
+                                                    disabled="true"
                                                     v-model="model.role"
                                                     :options="roles"
                                                     :searchable="true"

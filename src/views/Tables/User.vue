@@ -85,6 +85,7 @@
                             v-model="selectedItem.username"
                 />
                 <base-input alternative=""
+                            type="password"
                             v-if="this.selectedItem.id == 0"
                             required
                             spellcheck="false"

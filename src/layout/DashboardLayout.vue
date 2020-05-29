@@ -102,7 +102,7 @@
                                 this.isShowUser = true;
                                 break;
                             case 2:
-                                this.isShowUser = true;
+                                this.isShowGenre = true;
                                 break;
                             case 3:
                                 this.isShowMovie = true;
