@@ -45,7 +45,7 @@ class UsersDataService {
         return axios.get(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.Countrys}`);
     }
 
-    getPermissionTab(){
+    getPermissionTab() {
         return axios.get(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.PermissionTab}`);
     }
 
@@ -82,8 +82,9 @@ class UsersDataService {
     }
 
     getAllDirectors(form) {
-    return axios.post(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.AllDirector}`, form);
-}
+        return axios.post(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.AllDirector}`, form);
+    }
+
     getAllUserRoles(form) {
         return axios.post(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.AllUserRoles}`, form);
     }
@@ -94,7 +95,7 @@ class UsersDataService {
 
     updateUser(form) {
         // eslint-disable-next-line no-console
-        console.log("form",form)
+        console.log("form", form)
         return axios.post(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.UpdateUser}`, form);
     }
 
@@ -113,32 +114,68 @@ class UsersDataService {
     updateCountry(form) {
         return axios.post(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.UpdateCountry}`, form);
     }
+
     deleteCountryById(id) {
         return axios.get(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.DeleteCountryById}` + id);
     }
+
     updateDirector(form) {
         return axios.post(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.UpdateDirector}`, form);
     }
+
     deleteDirectorById(id) {
         return axios.get(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.DeleteDirectorById}` + id);
     }
+
     updateGenre(form) {
         return axios.post(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.UpdateGenre}`, form);
     }
+
     deleteGenreById(id) {
         return axios.get(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.DeleteGenreById}` + id);
     }
+
     updateMovie(form) {
         return axios.post(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.UpdateMovies}`, form);
     }
-    deleteMovieById(id){
+
+    deleteMovieById(id) {
         return axios.get(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.DeleteMovieById}` + id);
     }
+
     UpdateUserRole(form) {
         return axios.post(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.UpdateUserRole}`, form);
     }
-    deleteUserRoleById(id){
+
+    deleteUserRoleById(id) {
         return axios.get(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.DeleteUserRoleById}` + id);
+    }
+
+    getSecured(user, password) {
+
+        return axios.get(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.Secured}`, {
+            auth: {
+                username: user,
+                password: password
+            }
+        });
+    }
+
+    login(user, password) {
+        return axios.get(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.login}`, {
+            auth: {
+                username: user,
+                password: password
+            }
+        });
+    }
+
+    getUserByUserName(username) {
+        return axios.get(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.GetUserByUserName}` + username);
+    }
+
+    updateUserPassword(form) {
+        return axios.post(`${INSTRUCTOR_API_URL}/${APIPath.MOVIE.UpdateUserPassword}`, form);
     }
 }
 

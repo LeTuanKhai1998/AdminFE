@@ -20,6 +20,7 @@ import App from './App.vue'
 import router from './router'
 import VueRouterBackButton from 'vue-router-back-button'
 import VueLazyload from 'vue-lazyload'
+import store from "./store";
 
 import firebase from "firebase";
 
@@ -63,6 +64,7 @@ Vue.config.productionTip = false
 Vue.use(ArgonDashboard)
 new Vue({
     router,
+    store,
     render: h => h(App)
 }).$mount('#app')
 

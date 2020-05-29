@@ -3,7 +3,7 @@
         <!--        <base-header class="header pb-8 pt-5 pt-lg-8 d-flex align-items-center background"-->
         <!--                     :style="{'backgroundImage': 'url('+getImgUrl(model.banner.url)+')'}">-->
         <base-header class="header pb-8 pt-5 pt-lg-8 d-flex align-items-center background"
-                   :banner="model.banner" >
+                     :banner="model.banner">
             <!-- Mask -->
             <span class="mask bg-gradient-success opacity-8"></span>
             <!-- Header container -->
@@ -78,6 +78,38 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="text-center" style="padding-bottom: 100px">
+                                <h6 class="heading-small text-muted mb-4">Trailer</h6>
+                                <div class="h5 font-weight-300" v-if="model.trailers.length>0">
+                                    <iframe style="width: 320px;height: 240px" :src="model.trailers[0].url"></iframe>
+                                </div>
+                                <div class="h5 font-weight-300" v-else>
+                                    <img class="text-center" v-lazy="tempImage" :alt="model.banner.alt"
+                                         style="max-width: 320px;border-radius: 10px; border: 1px solid;padding: 10px;box-shadow: 2px 4px #888888;">
+                                </div>
+                                <div class="h5 font-weight-300">
+                                    <base-input alternative=""
+                                                spellcheck="false"
+                                                label="Nhập link nhúng youtube"
+                                                placeholder="Nhập link nhúng youtube"
+                                                input-classes="form-control-alternative"
+                                                v-model="tempTrailerUrl"/>
+                                    <button @click="changeTrailerLink" class="btn btn-info"
+                                            style="font-size: small;min-width: 120px;">Đổi link traier
+                                    </button>
+
+                                </div>
+                                <!--                                <div class="h5 mt-4">-->
+                                <!--                                    <i class="ni business_briefcase-24 mr-2"></i>Solution Manager - Creative Tim Officer-->
+                                <!--                                </div>-->
+                                <!--                                <div>-->
+                                <!--                                    <i class="ni education_hat mr-2"></i>University of Computer Science-->
+                                <!--                                </div>-->
+                                <!--                                <hr class="my-4"/>-->
+                                <!--                                <p>Ryan — the name taken by Melbourne-raised, Brooklyn-based Nick Murphy — writes,-->
+                                <!--                                    performs and records all of his own music.</p>-->
+                                <!--                                <a href="#">Show more</a>-->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -99,6 +131,30 @@
                         <template>
                             <form @submit.prevent>
                                 <div class="pl-lg-4">
+                                    <div class="row" style="margin-bottom: 80px">
+                                        <div class="col-md-12">
+                                            <h6 class="heading-small text-muted mb-4">Xem trước phim</h6>
+                                            <div class="col-md-12">
+                                                <div class="upload-btn-wrapper">
+                                                    <button class="btn btn-info"
+                                                            style="font-size: small;min-width: 120px;">Chọn phim
+                                                    </button>
+                                                    <input accept="video/*" type="file" name="myfile"
+                                                           style="cursor: pointer"
+                                                           @change="onFileSelectedMovie"/>
+                                                </div>
+                                            </div>
+                                            <div v-if="model.serves.length>0">
+                                                <video width="100%" height="auto" controls
+                                                       :src="this.model.serves[0].url"></video>
+                                            </div>
+                                            <div v-else>
+                                                <img class="text-center" v-lazy="tempImage" :alt="model.banner.alt"
+                                                     style="max-width: 640px;border-radius: 10px">
+                                            </div>
+                                        </div>
+
+                                    </div>
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <base-input alternative=""
@@ -206,15 +262,18 @@
                 <h3 class="modal-title">Lưu thông tin</h3>
             </template>
             <div>
-                <base-progress type="success" :height="8" :value="uploadValue"
+                <base-progress v-if="selectedImage" type="success" :height="8" :value="uploadValue"
                                label="Đang tải ảnh lên..."></base-progress>
                 <h5 v-if="uploadValue==100" class="modal-title" style="color: green;margin-top: 5px">Đã tải ảnh thành
                     công!</h5>
-                <base-progress type="success" :height="8" :value="uploadValueBanner"
+                <base-progress v-if="selectedBanner" type="success" :height="8" :value="uploadValueBanner"
                                label="Đang tải ảnh banner lên..."></base-progress>
-                <h5 v-if="uploadValue==100" class="modal-title" style="color: green;margin-top: 5px">Đã tải ảnh banner
-                    thành
-                    công!</h5>
+                <h5 v-if="uploadValueBanner==100" class="modal-title" style="color: green;margin-top: 5px">Đã tải ảnh
+                    banner thành công!</h5>
+                <base-progress v-if="selectedMovie" type="success" :height="12" :value="uploadValueMovie"
+                               label="Đang tải ảnh phim lên..."></base-progress>
+                <h5 v-if="uploadValueMovie==100" class="modal-title" style="color: green;margin-top: 5px">Đã tải ảnh
+                    phim thành công!</h5>
             </div>
             <!--            </div>-->
             <template slot="footer">
@@ -235,7 +294,7 @@
 
     export default {
         components: {
-            Multiselect
+            Multiselect,
         },
         name: 'movie-deatil',
         props: {
@@ -243,8 +302,11 @@
         },
         data() {
             return {
+                tempTrailerUrl: "",
+                tempImage: "https://firebasestorage.googleapis.com/v0/b/movie-online-7f8ea.appspot.com/o/movies%2Fempty.jpg?alt=media&token=dbdc5be2-4c74-4dc8-8f56-6c9217a678b4",
                 uploadValue: 0,
                 uploadValueBanner: 0,
+                uploadValueMovie: 0,
                 isUploadImage: false,
                 member: {
                     name: "Jakz",
@@ -259,6 +321,7 @@
                 model: null,
                 message: '',
                 form: null,
+                selectedMovie: null,
                 selectedImage: null,
                 selectedBanner: null,
                 formToast: {
@@ -273,6 +336,27 @@
             this.prepation();
         },
         methods: {
+            changeTrailerLink() {
+                if (this.model.trailers.length == 0) {
+                    this.model.trailers.push({
+                        "id": 0,
+                        "url": this.tempTrailerUrl
+                    })
+                } else {
+                    this.model.trailers[0].url = this.tempTrailerUrl;
+                }
+            },
+            onFileSelectedMovie(event) {
+                this.selectedMovie = event.target.files[0];
+                if (this.model.serves.length == 0) {
+                    this.model.serves.push({
+                        "id": 0,
+                        "url": URL.createObjectURL(this.selectedMovie)
+                    })
+                } else {
+                    this.model.serves[0].url = URL.createObjectURL(this.selectedMovie);
+                }
+            },
             onFileSelectedBanner(event) {
                 this.selectedBanner = event.target.files[0];
                 this.model.banner.url = URL.createObjectURL(this.selectedBanner);
@@ -303,6 +387,8 @@
                 console.log("image", this.model.image)
                 // eslint-disable-next-line no-console
                 console.log("banner", this.model.banner)
+                // eslint-disable-next-line no-console
+                console.log("banner", this.model.serves)
                 this.setDataForm();
                 MovieService.updateMovie(this.form)
                     .then(respose => {
@@ -323,46 +409,103 @@
                 this.model.slug = stringUtil.convertToSlug(this.model.name)
                 if (this.selectedImage) {
                     this.isUploadImage = true;
-                    this.uploadImage(this.model.slug, this.selectedImage, 1);
+                    this.uploadFile(this.model.slug, this.selectedImage, 1);
                 }
                 if (this.selectedImage) {
                     this.isUploadImage = true;
-                    this.uploadImage(this.model.slug + "_banner", this.selectedBanner, 2);
+                    this.uploadFile(this.model.slug + "_banner", this.selectedBanner, 2);
+                }
+                if (this.selectedMovie) {
+                    this.isUploadImage = true;
+                    this.uploadFile(this.model.slug, this.selectedMovie, 3);
                 }
             },
-            uploadImage(name, selectedImage, type) {
+            uploadFile(name, selectedImage, type) {
                 // let data = new FormData();
                 // data.append('file', this.selectedImage, 'my-picture');
-                const storageRef = firebase.storage().ref(`/movies/${name}.jpg`).put(selectedImage);
+
+                let extention = ".jpg";
+                let sourceFolder = "/movies/";
+                if (type == 3) {
+                    extention = ".mp4"
+                    sourceFolder = "/videos/";
+                }
+
+                const storageRef = firebase.storage().ref(`${sourceFolder}${name}${extention}`).put(selectedImage);
                 storageRef.on(`state_changed`, snapshot => {
-                        if (type == 1) {
-                            this.uploadValue = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        } else {
-                            this.uploadValueBanner = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        switch (type) {
+                            case 1:
+                                this.uploadValue = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                                break;
+                            case 2:
+                                this.uploadValueBanner = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                                break;
+                            case 3:
+                                this.uploadValueMovie = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                                break;
+                            default:
+                                break;
                         }
+                        // if (type == 1) {
+                        //     this.uploadValue = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        // } else {
+                        //     this.uploadValueBanner = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        // }
 
                     }, error => {
                         // eslint-disable-next-line no-console
                         console.log(error.message)
                     },
                     () => {
-                        if (type == 1) {
-                            this.uploadValue = 100;
-                        } else {
-                            this.uploadValueBanner = 100;
+                        switch (type) {
+                            case 1:
+                                this.uploadValue = 100;
+                                break;
+                            case 2:
+                                this.uploadValueBanner = 100;
+                                break;
+                            case 3:
+                                this.uploadValueMovie = 100;
+                                break;
+                            default:
+                                break;
                         }
+
+                        // if (type == 1) {
+                        //     this.uploadValue = 100;
+                        // } else {
+                        //     this.uploadValueBanner = 100;
+                        // }
                         storageRef.snapshot.ref.getDownloadURL().then((url) => {
-                            if (type == 1) {
-                                this.model.image.url = url;
-                                this.model.image.alt = name;
-                            } else {
-                                this.model.banner.url = url;
-                                this.model.banner.alt = name + " banner";
+                            switch (type) {
+                                case 1:
+                                    this.model.image.url = url;
+                                    this.model.image.alt = name;
+                                    break;
+                                case 2:
+                                    this.model.banner.url = url;
+                                    this.model.banner.alt = name + " banner";
+                                    break;
+                                case 3:
+                                    this.model.serves[0].url = url;
+                                    break;
+                                default:
+                                    break;
                             }
+                            // if (type == 1) {
+                            //     this.model.image.url = url;
+                            //     this.model.image.alt = name;
+                            // } else {
+                            //     this.model.banner.url = url;
+                            //     this.model.banner.alt = name + " banner";
+                            // }
                             // eslint-disable-next-line no-console
                             console.log("image", this.model.image)
                             // eslint-disable-next-line no-console
                             console.log("banner", this.model.banner)
+
+                            // eslint-disable-next-line no-console
+                            console.log("movie", this.model.serves)
                             // this.picture =url;
                             // eslint-disable-next-line no-console
                             console.log("url", url)
@@ -425,7 +568,9 @@
                     },
                     "genres": [],
                     "actors": [],
-                    "directors": []
+                    "directors": [],
+                    "serves": [],
+                    "trailers": []
                 }
             }
         }
